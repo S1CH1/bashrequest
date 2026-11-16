@@ -2,6 +2,13 @@
 
 Jeu de révision Unix/Bash dans le terminal : tu tapes de **vraies commandes**, le jeu vérifie le résultat.
 
+> [!CAUTION]
+> **Le bac à sable n'est pas une protection.** Les commandes que tu tapes s'exécutent vraiment, avec tes droits, comme dans un terminal normal.
+> Le jeu place `~` dans `~/.bashquest/bac_a_sable`, donc `rm -rf ~` n'efface que le bac à sable. Mais une commande sur un **chemin absolu** (`rm -rf /home/...`, `chmod -R ... /`) agit sur ta vraie machine.
+> Aucune mission ne demande de sortir du bac à sable : reste dedans.
+>
+> Le jeu ne se connecte à rien (aucun accès réseau), ne s'installe nulle part et n'écrit que dans `~/.bashquest/`.
+
 ## Installation
 
 **Linux / macOS**
