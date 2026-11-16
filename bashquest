@@ -1,0 +1,3 @@
+#!/bin/bash
+# Lanceur : ./bashquest   (ou alias bashquest='.../bashquest')
+exec python3 "$(dirname "$0")/bashquest.py" "$@"
