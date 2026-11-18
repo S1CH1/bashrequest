@@ -32,7 +32,7 @@ from fiches import FICHES  # noqa: E402
 from lecons import LECONS  # noqa: E402
 import datetime  # noqa: E402
 
-VERSION = "1.1"
+VERSION = "1.0.1"
 DATA = os.path.expanduser(os.environ.get("BASHQUEST_HOME", "~/.bashquest"))
 SANDBOX = os.path.join(DATA, "bac_a_sable")
 WORK = os.path.join(DATA, "travail")
