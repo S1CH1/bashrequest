@@ -299,8 +299,11 @@ etat("nav_mkdir_p", "nav", "Arborescence en une commande", """
     Crée en UNE SEULE commande l'arborescence tp/a/b/c ainsi que le dossier tp/d.
     (Si tu t'es trompé, :reset remet tout à zéro.)
     """, 1,
-     check=lambda c: c.isdir("tp/a/b/c") and c.isdir("tp/d")
-     and sum(1 for h in c.historique if "mkdir" in h) == 1,
+     # On juge la commande qui vient d'être tapée : les essais ratés d'avant ne comptent pas,
+     # mais deux mkdir (sur une ou plusieurs lignes) ne valident pas.
+     check=lambda c: c.isdir("tp/a/b/c") and c.isdir("tp/d") and c.rc == 0
+     and len(re.findall(r"\bmkdir\b", cmd0(c))) == 1
+     and "a/b/c" in cmd0(c) and re.search(r"(?:^|[\s/{,])d(?:[\s/},]|$)", cmd0(c)),
      indices=["mkdir accepte plusieurs arguments.",
               "Sans une option, mkdir refuse de créer a/b/c si a et b n'existent pas : mkdir -p"],
      solution="mkdir -p tp/a/b/c tp/d",
