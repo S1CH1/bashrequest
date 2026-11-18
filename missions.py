@@ -1225,7 +1225,7 @@ script("sc_age", "script_bases", "Lire au clavier", """
     echo "Année de naissance ?"
     read annee
     echo "Tu as environ $(( $(date +%Y) - annee )) ans"
-    """, [T(stdin="2005\n"), T(stdin="1990\n")],
+    """, [T(stdin="2005\n"), T(stdin="1990\n")], question="Année de naissance ?",
        indices=["read annee lit une ligne dans la variable annee.", "L'année actuelle : $(date +%Y)"])
 
 script("sc_read2", "script_bases", "read et plusieurs variables", """
@@ -1240,8 +1240,9 @@ script("sc_read2", "script_bases", "read et plusieurs variables", """
     read prenom nom
     echo "Prénom : $prenom"
     echo "Nom : $nom"
-    """, [T(stdin="Ada Lovelace\n"), T(stdin="Ada Lovelace Byron\n")],
-       doit=[(r"read\s+(-r\s+)?\w+\s+\w+", "Utilise un seul read avec deux variables.")],
+    """, [T(stdin="Ada Lovelace\n"), T(stdin="Ada Lovelace Byron\n")], question="Prénom et nom ?",
+       doit=[(r"(?m)^[ \t]*read\b[^\n#]*?[ \t][A-Za-z_]\w*[ \t]+[A-Za-z_]\w*[ \t]*(#.*)?$",
+              "Utilise un seul read avec deux variables (read prenom nom, ou read -p \"...\" prenom nom).")],
        indices=["read a b : le 1er mot va dans a, TOUT LE RESTE dans b."],
        explication="La dernière variable récupère le reste de la ligne : nom = « Lovelace Byron ».")
 
@@ -1358,6 +1359,7 @@ script("sc_ouinon", "script_tests", "y/n", """
            exit 1 ;;
     esac
     """, [T(stdin="y\n", rc=True), T(stdin="n\n", rc=True), T(stdin="peut-être\n", rc="exact", stderr="plein")],
+       question="Continuer (y/n) ?",
        indices=["read rep, puis case $rep in ...", "Message d'erreur : echo \"...\" >&2 ; puis exit 1"])
 
 script("sc_moi", "script_tests", "Le test qui plante", """

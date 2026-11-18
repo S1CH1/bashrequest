@@ -32,7 +32,7 @@ from fiches import FICHES  # noqa: E402
 from lecons import LECONS  # noqa: E402
 import datetime  # noqa: E402
 
-VERSION = "1.0.1"
+VERSION = "1.0.2"
 DATA = os.path.expanduser(os.environ.get("BASHQUEST_HOME", "~/.bashquest"))
 SANDBOX = os.path.join(DATA, "bac_a_sable")
 WORK = os.path.join(DATA, "travail")
@@ -564,6 +564,22 @@ def premier_entier(txt):
     return int(m.group()) if m else None
 
 
+def sans_question(out, question):
+    """Retire la question d'un read (seule sur sa ligne ou en début de ligne)."""
+    if not question:
+        return out
+    q = " ".join(question.split())
+    lignes = []
+    for l in out.split("\n"):
+        n = " ".join(l.split())
+        if n == q:
+            continue
+        if n.startswith(q):
+            l = n[len(q):]
+        lignes.append(l)
+    return "\n".join(lignes)
+
+
 def comparer(cmp, out, attendu, cwd_user, root_user, cwd_ref, root_ref):
     if cmp == "lignes":
         return norm_lignes(out) == norm_lignes(attendu)
@@ -782,6 +798,9 @@ class Partie:
         for motif, msg in m.get("doit", []):
             if not re.search(motif, texte):
                 pb.append(msg)
+        question = m.get("question")
+        if question and question not in texte:
+            pb.append("Le script doit poser la question « %s » (avec echo, ou read -p)." % question)
         if pb:
             return False, pb
         for i, t in enumerate(m["tests"]):
@@ -808,8 +827,11 @@ class Partie:
             if t.get("contient") or t.get("absent"):
                 pass
             elif t.get("stdout", True):
-                if not comparer(t.get("cmp", m.get("cmp", "lignes")), got["out"], ref["out"],
-                                None, None, None, None):
+                # La question posée avant read est ignorée : echo "question" + read et
+                # read -p "question" (qui n'affiche rien quand la saisie ne vient pas du clavier)
+                # sont acceptés tous les deux.
+                if not comparer(t.get("cmp", m.get("cmp", "lignes")), sans_question(got["out"], question),
+                                sans_question(ref["out"], question), None, None, None, None):
                     raisons.append("sortie différente")
             if t.get("rc"):
                 if (got["rc"] == 0) != (ref["rc"] == 0) or (t["rc"] == "exact" and got["rc"] != ref["rc"]):
@@ -828,9 +850,9 @@ class Partie:
                 if bavard:
                     if "sortie différente" in raisons:
                         msg.append("  attendu :")
-                        msg += ["    | " + l for l in (ref["out"].rstrip("\n").split("\n") or [""])[:12]]
+                        msg += ["    | " + l for l in (sans_question(ref["out"], question).strip("\n").split("\n") or [""])[:12]]
                         msg.append("  obtenu :")
-                        msg += ["    | " + l for l in (got["out"].rstrip("\n").split("\n") or [""])[:12]]
+                        msg += ["    | " + l for l in (sans_question(got["out"], question).strip("\n").split("\n") or [""])[:12]]
                     if got["err"].strip():
                         msg.append("  stderr de ton script :")
                         msg += ["    | " + l for l in got["err"].rstrip("\n").split("\n")[:6]]
